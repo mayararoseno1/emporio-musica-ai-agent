@@ -1,0 +1,158 @@
+{
+  "categories": {
+    "rows": 9,
+    "columns": [
+      "category_id",
+      "name",
+      "description"
+    ],
+    "missing": {
+      "category_id": 0,
+      "name": 0,
+      "description": 0
+    },
+    "duplicates": 0,
+    "values": {}
+  },
+  "customers": {
+    "rows": 50,
+    "columns": [
+      "customer_id",
+      "name",
+      "phone",
+      "email",
+      "city"
+    ],
+    "missing": {
+      "customer_id": 0,
+      "name": 0,
+      "phone": 0,
+      "email": 0,
+      "city": 0
+    },
+    "duplicates": 0,
+    "values": {}
+  },
+  "orders": {
+    "rows": 20,
+    "columns": [
+      "order_id",
+      "customer_id",
+      "order_date",
+      "status",
+      "total_brl",
+      "payment_method",
+      "tracking_code",
+      "estimated_delivery",
+      "notes"
+    ],
+    "missing": {
+      "order_id": 0,
+      "customer_id": 0,
+      "order_date": 0,
+      "status": 0,
+      "total_brl": 0,
+      "payment_method": 0,
+      "tracking_code": 12,
+      "estimated_delivery": 12,
+      "notes": 16
+    },
+    "duplicates": 0,
+    "values": {
+      "status": [
+        "cancelled",
+        "confirmed",
+        "delivered",
+        "pending",
+        "shipped"
+      ],
+      "payment_method": [
+        "boleto",
+        "credit_12x",
+        "credit_3x",
+        "credit_6x",
+        "debit",
+        "pix"
+      ]
+    },
+    "orphan_customer_id": 0,
+    "total_mismatches_at_current_catalog_price": 2
+  },
+  "order_items": {
+    "rows": 22,
+    "columns": [
+      "order_id",
+      "quantity",
+      "product_id"
+    ],
+    "missing": {
+      "order_id": 0,
+      "quantity": 0,
+      "product_id": 0
+    },
+    "duplicates": 0,
+    "values": {},
+    "orphan_order_id": 0,
+    "orphan_product_id": 0
+  },
+  "products": {
+    "rows": 65,
+    "columns": [
+      "product_id",
+      "price_brl",
+      "name",
+      "category_id",
+      "description",
+      "stock_quantity",
+      "status",
+      "specs",
+      "created_at"
+    ],
+    "missing": {
+      "product_id": 0,
+      "price_brl": 0,
+      "name": 0,
+      "category_id": 0,
+      "description": 0,
+      "stock_quantity": 0,
+      "status": 0,
+      "specs": 0,
+      "created_at": 0
+    },
+    "duplicates": 0,
+    "values": {
+      "status": [
+        "active",
+        "coming_soon",
+        "discontinued"
+      ]
+    },
+    "orphan_category_id": 0,
+    "invalid_specs": 0
+  },
+  "promotions": {
+    "rows": 25,
+    "columns": [
+      "promotion_id",
+      "product_id",
+      "discount_percent",
+      "description",
+      "is_active"
+    ],
+    "missing": {
+      "promotion_id": 0,
+      "product_id": 0,
+      "discount_percent": 0,
+      "description": 0,
+      "is_active": 0
+    },
+    "duplicates": 0,
+    "values": {
+      "is_active": [
+        "0",
+        "1"
+      ]
+    },
+    "orphan_product_id": 0
+  }
+}
