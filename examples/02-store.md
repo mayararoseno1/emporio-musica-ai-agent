@@ -1,27 +1,17 @@
 # 02-store
 
-Status: ILLUSTRATIVE CONVERSATION; no LLM executed. Tool evidence below was executed against supplied data.
+Status: LIVE LLM EXECUTION
 
 Order example uses operator-provided demo identity 3. This is not authentication.
 
-**Cliente (cenário):** Qual é o endereço e o horário da loja?
+**Cliente:** Qual é o endereço e o horário da loja?
 
-**Resposta ilustrativa, escrita para revisão; não gerada pelo agente:** A loja fica na Rua 14 de Maio, 3200, Centro, Campo Grande/MS. Funciona de segunda a sexta, das 9h às 18h, e sábado, das 9h às 13h. Fecha aos domingos e feriados; datas especiais podem ter alterações.
+**Agente:** Olá! Que bom ter você por aqui.
 
-## Executed tool evidence
+Nossa loja fica na Rua 14 de Maio, 3200, no Centro de Campo Grande/MS.
 
-```json
-[
-  {
-    "tool": "get_store_information",
-    "result": {
-      "retrieved_pages": [
-        1,
-        2,
-        6
-      ],
-      "passage_count": 4
-    }
-  }
-]
-```
+Sobre o horário de funcionamento, estamos abertos de segunda a sexta, das 09:00 às 18:00, e aos sábados, das 09:00 às 13:00. Domingos e feriados a loja permanece fechada.
+
+Vale notar que encontramos informações divergentes sobre o contato telefônico em nosso manual interno, então, se precisar falar conosco, recomendo confirmar com nossa equipe qual o número atual de sua preferência.
+
+Como posso ajudar com algum instrumento hoje?

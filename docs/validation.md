@@ -1,6 +1,6 @@
 # Validation and delivery report
 
-**Current provider: Google Gemini (`gemini-3.1-flash-lite`).** The OpenAI sections below record earlier milestones; the Gemini migration section at the end is the current configuration.
+**Current provider: Google Gemini (`gemini-3.1-flash-lite`). Five user-authorized live scenarios have now succeeded; see the final audit section below.** The OpenAI sections below record earlier milestones; the Gemini migration section at the end is the current configuration.
 
 ## Actual local verification
 
@@ -92,3 +92,22 @@ The custom test temporary directory is inside the ignored virtualenv to avoid th
 **Live Gemini validation remains pending:** GEMINI_API_KEY is not configured. The five example conversations remain explicitly illustrative. Configure a Google AI Studio key, run `python -m scripts.diagnose`, then `python -m scripts.examples --live` to produce actual model transcripts. Public GitHub publication and recruiter submission have not been performed.
 
 Sources: [Google compatibility](https://ai.google.dev/gemini-api/docs/openai), [model](https://ai.google.dev/gemini-api/docs/models/gemini-3.1-flash-lite), [pricing](https://ai.google.dev/gemini-api/docs/pricing).
+
+
+## Final brief audit and authorized live verification
+
+The original three-page brief was re-read in full and compared with the repository. The user explicitly authorized sending the five fictional catalog/policy/order scenarios to Google and using project quota. An initial automatic approval rejection was resolved by that explicit authorization; the same command then ran normally. No customer name, email or phone is exposed by the order tool.
+
+Observed results:
+
+- `python -m scripts.examples --live`: **Saved five conversations (live)**. All five example files are real model outputs, not handwritten replacements.
+- Product catalog and cheapest-product follow-up returned the Tagima Memphis AC-39 at R$429.90 / R$408.41 PIX; store address and opening hours matched the supplied manual.
+- Order 1 returned delivered in the operator-provided customer 3 demo context.
+- Online return scenario explained the seven-day period and basic conditions, with follow-up rather than a claimed refund or cancellation.
+- Combined scenario returned the Yamaha C40 PIX price of R$569.91 and online return conditions.
+- `python -m pytest -q -p no:cacheprovider --basetemp=.venv/pytest-requirements-review`: **44 passed in 24.78s**; `pip check`: no broken requirements.
+- Git has real incremental commits; no remote is configured and public repository publication is not verified/performed here.
+
+Quality limitations observed directly: the store-information response unnecessarily mentioned the internal manual/contact discrepancy. The return sample asked for an email as an alternative to an order number and did not enumerate the final-sale exclusion. The combined sample summarized return terms without all exceptions. These are documented conversational quality/coverage limitations; the underlying retrieval includes the exceptions and the tools do not perform refunds. Broader live tests for out-of-scope questions and injection were not part of the five authorized scenarios; current deterministic tests verify boundaries, not all real model semantics.
+
+The public repository link, recruiter email and deadline compliance remain external delivery steps. See compliance-review.md for the requirement-by-requirement matrix. Earlier credential/quota statements above are historical and superseded by this successful Gemini run.

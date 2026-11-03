@@ -105,18 +105,17 @@ Unknown functions are rejected. Invalid JSON, extra fields, negative prices, wro
 .\.venv\Scripts\python.exe -m pytest -q
 .\.venv\Scripts\python.exe -m pip check
 .\.venv\Scripts\python.exe -m compileall -q src scripts main.py
-.\.venv\Scripts\python.exe -m scripts.examples
 ```
 
 The tests exercise real data joins, prices, stock, policies, promotion arithmetic, order privacy, missing tracking, corrupted data, invalid arguments, tool/provider failures, loop bounds and history. Provider responses are mocked: prompt-boundary tests verify enforcement and request construction, not the semantic quality of a real model's off-topic or adversarial response.
 
-Five files in [examples](examples/) contain explicitly **illustrative** conversations plus evidence from executed real tools. They are not claimed as LLM transcripts. To replace them with actual model runs after configuring a key:
+Five files in [examples](examples/) now contain **actual Gemini conversations**, executed with explicit user authorization and reviewed against the supplied data. They cover catalog plus follow-up, store information, an order in trusted demo context, returns, and combined product/policy retrieval. To regenerate actual transcripts:
 
 ```powershell
 .\.venv\Scripts\python.exe -m scripts.examples --live
 ```
 
-Each scenario creates a separate conversation; the product scenario includes a follow-up. Live mode fails on provider errors and labels successful transcripts. Review generated content before publishing. The order scenario uses operator demo identity 3. See [validation report](docs/validation.md) for actual local results and remaining requirements.
+Each scenario creates a separate conversation; the product scenario includes a follow-up. Live mode fails on provider errors and labels successful transcripts. Review generated content before publishing. The order scenario uses operator demo identity 3. See [validation report](docs/validation.md) and the [brief compliance review](docs/compliance-review.md) for actual results and remaining requirements. Running the examples script without `--live` deliberately regenerates illustrative examples and overwrites these files; avoid that before submission.
 
 ## Repository layout
 
@@ -128,7 +127,7 @@ main.py            Local CLI and environment configuration
 scripts/examples.py  Reproducible evidence and optional live transcripts
 tests/             Deterministic integration/unit tests
 docs/              Audit, assumptions and validation report
-examples/          Five labeled demonstrations
+examples/          Five real Gemini conversation transcripts
 data/original/     Local supplied package, ignored by Git
 ```
 
@@ -136,13 +135,13 @@ Dependencies are frozen in `requirements.txt` from the installed environment. No
 
 ## Limitations and next steps
 
-The previous OpenAI integration was blocked by quota. The application has since migrated to Gemini. End-to-end Gemini behavior remains unverified until a GEMINI_API_KEY is configured; offline tests exercise the real SDK using simulated HTTP responses. Lexical search can miss synonyms; section ranking can retrieve neighboring topics. Tool-call selection and final prose are probabilistic even when returned facts are deterministic. No post-generation factual verifier exists. Default history is capped by turns rather than token budget. Original inputs are required to reproduce integration tests. The data snapshot and policy version may be old. Store holidays and special hours are not available. The CLI trusts its local operator, not arbitrary remote customers.
+The previous OpenAI integration was blocked by quota. The application has since migrated to Gemini, and all five documented conversation scenarios have now been executed with the real provider. These are sample-based checks, not a guarantee against hallucinations. Offline tests also exercise the real SDK using simulated HTTP responses. Lexical search can miss synonyms; section ranking can retrieve neighboring topics. Tool-call selection and final prose are probabilistic even when returned facts are deterministic. No post-generation factual verifier exists. Default history is capped by turns rather than token budget. Original inputs are required to reproduce integration tests. The data snapshot and policy version may be old. Store holidays and special hours are not available. The CLI trusts its local operator, not arbitrary remote customers.
 
-Next steps are live grounded-answer evaluations (including off-topic requests and injection), richer Portuguese retrieval with measured recall, token-based history limits, authenticated customer sessions before remote exposure, dataset schema expansion for receipt dates and historical prices, and staff review of policy contradictions. Embeddings or an HTTP API should only be added if measured needs justify them.
+Next steps are broader live grounded-answer evaluations (including off-topic requests and injection), richer Portuguese retrieval with measured recall, token-based history limits, authenticated customer sessions before remote exposure, dataset schema expansion for receipt dates and historical prices, and staff review of policy contradictions. Embeddings or an HTTP API should only be added if measured needs justify them.
 
 ## AI development assistance
 
-OpenAI Codex inspected the supplied materials, analyzed the CSVs/PDFs, made architecture decisions, implemented the code, created mock-based tests and illustrative scenarios, ran verification and wrote documentation. Codex used official OpenAI documentation for the original integration and official Google documentation for the Gemini migration. No human code review, independent live evaluation or manual authorship of all code is claimed. Review the implementation and tradeoffs before interview/submission.
+OpenAI Codex inspected the supplied materials, analyzed the CSVs/PDFs, made architecture decisions, implemented the code, created mock-based tests and scenarios, ran offline verification and five user-authorized live conversations, and wrote documentation. Codex used official OpenAI documentation for the original integration and official Google documentation for the Gemini migration. No review by the candidate, independent third-party evaluation or manual authorship of all code is claimed. Review the implementation and tradeoffs before interview/submission.
 
 ## Git and delivery
 

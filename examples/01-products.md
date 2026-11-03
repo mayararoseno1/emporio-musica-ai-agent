@@ -1,91 +1,27 @@
 # 01-products
 
-Status: ILLUSTRATIVE CONVERSATION; no LLM executed. Tool evidence below was executed against supplied data.
+Status: LIVE LLM EXECUTION
 
 Order example uses operator-provided demo identity 3. This is not authentication.
 
-**Cliente (cenário):** Vocês têm violões disponíveis até R$ 1.000?
+**Cliente:** Vocês têm violões disponíveis até R$ 1.000?
 
-**Resposta ilustrativa, escrita para revisão; não gerada pelo agente:** Sim. Algumas opções são: Tagima Memphis AC-39 Nylon Natural por R$ 429.9; Rozini RC-104 Nylon Estudante por R$ 459.9; Shelby SN-100 Folk Aço Preto por R$ 549. Os valores são do catálogo local.
+**Agente:** Olá! Temos sim várias opções de violões disponíveis por até R$ 1.000,00. Aqui estão alguns deles, com o preço à vista no PIX:
 
-**Cliente (cenário):** E qual desses é o mais barato?
+*   **Tagima Memphis AC-39 (Nylon):** R$ 429,90 (R$ 408,41 no PIX)
+*   **Rozini RC-104 (Nylon):** R$ 459,90 (R$ 436,91 no PIX)
+*   **Shelby SN-100 (Aço):** R$ 549,00 (R$ 521,55 no PIX)
+*   **Giannini GF-1R (Aço):** R$ 579,90 (R$ 550,91 no PIX)
+*   **Yamaha C40 (Nylon):** R$ 599,90 (R$ 569,91 no PIX)
+*   **Giannini GN-15 (Nylon):** R$ 689,00 (R$ 654,55 no PIX)
+*   **Yamaha F310 (Aço):** R$ 699,90 (R$ 664,91 no PIX)
+*   **Tagima Dallas Tuner (Aço):** R$ 749,00 (R$ 711,55 no PIX)
+*   **Shelby SGD-195E (Elétrico):** R$ 799,00 (R$ 759,05 no PIX)
 
-**Resposta ilustrativa, escrita para revisão; não gerada pelo agente:** Entre as opções consultadas, Tagima Memphis AC-39 Nylon Natural é o mais barato: R$ 429.9.
+Algum desses modelos te interessa ou gostaria de saber detalhes sobre outro? Fico à disposição!
 
-## Executed tool evidence
+**Cliente:** E qual desses é o mais barato?
 
-```json
-[
-  {
-    "tool": "search_products",
-    "result": {
-      "products": [
-        {
-          "product_id": "83",
-          "name": "Tagima Memphis AC-39 Nylon Natural",
-          "description": "Violão clássico com cordas de nylon, perfeito para quem está começando. Corpo leve e confortável para longas sessões de estudo.",
-          "price_brl": "429.9",
-          "stock_quantity": "15",
-          "status": "active",
-          "specs": {
-            "top": "Linden",
-            "back_sides": "Linden",
-            "neck": "Nato",
-            "strings": "nylon",
-            "scale": "650mm",
-            "electronics": "no",
-            "color": "Natural"
-          },
-          "available": true,
-          "promotions": [],
-          "pix_price_brl": "408.41"
-        },
-        {
-          "product_id": "85",
-          "name": "Rozini RC-104 Nylon Estudante",
-          "description": "Violão clássico de estudo da Rozini, feito com madeiras nacionais. Acabamento caprichado e preço acessível para iniciantes.",
-          "price_brl": "459.9",
-          "stock_quantity": "10",
-          "status": "active",
-          "specs": {
-            "top": "Spruce",
-            "back_sides": "Sapele",
-            "neck": "Nato",
-            "strings": "nylon",
-            "scale": "650mm",
-            "electronics": "no",
-            "color": "Natural"
-          },
-          "available": true,
-          "promotions": [],
-          "pix_price_brl": "436.91"
-        },
-        {
-          "product_id": "89",
-          "name": "Shelby SN-100 Folk Aço Preto",
-          "description": "Violão folk aço com visual moderno em preto. Indicado para quem busca um instrumento versátil com boa relação custo-benefício.",
-          "price_brl": "549",
-          "stock_quantity": "5",
-          "status": "active",
-          "specs": {
-            "top": "Linden",
-            "back_sides": "Linden",
-            "neck": "Nato",
-            "strings": "steel",
-            "scale": "648mm",
-            "electronics": "no",
-            "color": "Preto"
-          },
-          "available": true,
-          "promotions": [],
-          "pix_price_brl": "521.55"
-        }
-      ],
-      "total_matches": 12,
-      "price_filter": "table_price_brl",
-      "source": "products.csv + categories.csv + promotions.csv",
-      "snapshot": true
-    }
-  }
-]
-```
+**Agente:** O mais em conta no momento é o **Tagima Memphis AC-39 (Nylon)**, que custa R$ 429,90, ou R$ 408,41 se você pagar via PIX. É uma excelente opção para quem está começando!
+
+Quer saber mais alguma coisa sobre ele?
