@@ -20,7 +20,7 @@ def main():
     logging.basicConfig(level=logging.WARNING)
     try:
         store = Store(Path(os.getenv('DATA_DIR', str(ROOT / 'data' / 'original'))))
-    except (ValueError, OSError, KeyError) as exc:
+    except Exception as exc:
         parser.exit(2, f'Dados locais indisponíveis ou inválidos ({type(exc).__name__}). Consulte o README.\n')
     if args.check_data:
         print('Dados e políticas carregados e validados.')

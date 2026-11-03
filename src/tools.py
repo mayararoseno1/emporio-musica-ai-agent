@@ -4,6 +4,7 @@ import logging
 import re
 import unicodedata
 from decimal import Decimal, ROUND_HALF_UP
+from datetime import date
 from pathlib import Path
 
 import pandas as pd
@@ -61,7 +62,10 @@ class Store:
             self.tables[name] = pd.read_csv(matches[0], dtype=str, keep_default_na=False)
         self._validate()
         self.sections = []
-        pdf = next(data_dir.glob('*.pdf'))
+        pdfs = list(data_dir.glob('*.pdf'))
+        if len(pdfs) != 1:
+            raise ValueError('Expected exactly one policy PDF')
+        pdf = pdfs[0]
         for page_number, page in enumerate(PdfReader(pdf).pages, 1):
             text = re.sub(r'\s+', ' ', page.extract_text() or '').strip()
             # Keep complete sections, including exceptions on the same page.
@@ -72,6 +76,17 @@ class Store:
             raise ValueError('Policy PDF contains no extractable text')
 
     def _validate(self):
+        required = {
+            'products': {'product_id','price_brl','name','category_id','description','stock_quantity','status','specs','created_at'},
+            'categories': {'category_id','name','description'},
+            'customers': {'customer_id','name','phone','email','city'},
+            'orders': {'order_id','customer_id','order_date','status','total_brl','tracking_code','estimated_delivery','payment_method','notes'},
+            'order_items': {'order_id','product_id','quantity'},
+            'promotions': {'promotion_id','product_id','discount_percent','description','is_active'},
+        }
+        for table, columns in required.items():
+            if not columns.issubset(self.tables[table].columns) or self.tables[table].empty:
+                raise ValueError(f'Missing columns or empty table: {table}')
         keys = {'products': 'product_id', 'categories': 'category_id', 'orders': 'order_id', 'customers': 'customer_id', 'promotions': 'promotion_id'}
         for table, key in keys.items():
             df = self.tables[table]
@@ -89,6 +104,13 @@ class Store:
         for row in self.tables['promotions'].to_dict('records'):
             if row['is_active'] not in {'0','1'} or not 0 <= Decimal(row['discount_percent']) <= 100:
                 raise ValueError('Invalid promotion')
+        for row in self.tables['orders'].to_dict('records'):
+            total = Decimal(row['total_brl'])
+            if not total.is_finite() or total < 0 or row['status'] not in {'pending','confirmed','shipped','delivered','cancelled'}:
+                raise ValueError('Invalid order data')
+            date.fromisoformat(row['order_date'])
+            if row['estimated_delivery']:
+                date.fromisoformat(row['estimated_delivery'])
         for row in self.tables['order_items'].to_dict('records'):
             if int(row['quantity']) <= 0:
                 raise ValueError('Invalid order quantity')

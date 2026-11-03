@@ -104,10 +104,6 @@ def response_call(name='search_products',arguments='{}'):
     return NS(output=[NS(type='function_call',name=name,arguments=arguments,call_id='c1')],output_text='')
 
 
-def response_text(text):
-    return NS(output=[{'role':'assistant','content':text}],output_text=text)
-
-
 class FakeText(dict):
     type = 'message'
 
@@ -161,3 +157,26 @@ def test_empty_input(tools):
     agent=Agent(client,tools,'test')
     assert '4.000' in agent.reply('')
     client.responses.create.assert_not_called()
+
+@pytest.mark.parametrize('case',['orphan','schema','specs','missing_pdf','status'])
+def test_rejects_corrupt_inputs(tmp_path,case):
+    target=tmp_path/'data'
+    shutil.copytree(ROOT/'data'/'original',target)
+    if case=='missing_pdf':
+        next(target.glob('*.pdf')).unlink()
+    else:
+        import pandas as pd
+        table='products' if case!='status' else 'orders'
+        path=next(target.glob(f'* - {table}.csv'))
+        df=pd.read_csv(path,dtype=str,keep_default_na=False)
+        if case=='orphan':
+            df.loc[0,'category_id']='9999'
+        elif case=='schema':
+            df=df.drop(columns=['price_brl'])
+        elif case=='specs':
+            df.loc[0,'specs']='[]'
+        else:
+            df.loc[0,'status']='unknown'
+        df.to_csv(path,index=False)
+    with pytest.raises(ValueError):
+        Store(target)
