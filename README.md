@@ -134,7 +134,7 @@ Dependencies are frozen in `requirements.txt` from the installed environment. No
 
 ## Limitations and next steps
 
-No live model validation has been performed because no API credentials were available. Lexical search can miss synonyms; section ranking can retrieve neighboring topics. Tool-call selection and final prose are probabilistic even when returned facts are deterministic. No post-generation factual verifier exists. Default history is capped by turns rather than token budget. Original inputs are required to reproduce integration tests. The data snapshot and policy version may be old. Store holidays and special hours are not available. The CLI trusts its local operator, not arbitrary remote customers.
+Initial validation had no API credentials. A subsequent real provider diagnostic reached the API but returned HTTP 429 with type `insufficient_quota`; end-to-end model validation is still blocked by API quota/billing. Lexical search can miss synonyms; section ranking can retrieve neighboring topics. Tool-call selection and final prose are probabilistic even when returned facts are deterministic. No post-generation factual verifier exists. Default history is capped by turns rather than token budget. Original inputs are required to reproduce integration tests. The data snapshot and policy version may be old. Store holidays and special hours are not available. The CLI trusts its local operator, not arbitrary remote customers.
 
 Next steps are live grounded-answer evaluations (including off-topic requests and injection), richer Portuguese retrieval with measured recall, token-based history limits, authenticated customer sessions before remote exposure, dataset schema expansion for receipt dates and historical prices, and staff review of policy contradictions. Embeddings or an HTTP API should only be added if measured needs justify them.
 
@@ -151,3 +151,10 @@ gh repo create emporio-musica-ai-agent --public --source=. --remote=origin --pus
 ```
 
 If the GitHub CLI is unavailable, create the public repository in GitHub, add its remote using `git remote add origin <repository-url>` and push `master` with `git push -u origin master`. Public publishing and sending the repository link to the recruiter remain user actions; neither has been performed.
+
+
+## API troubleshooting
+
+Run `python -m scripts.diagnose` from the repository root to perform one short real API request. It may incur API usage if successful; it prints only a safe category and operator guidance, never the key or raw response body. Failure exits with status 1. Agent logs now distinguish quota, authentication, access, request and connection failures while keeping customer-facing replies generic.
+
+The observed 429 `insufficient_quota` requires checking API credits and usage/spend limits for the key's project/organization. Repeating the same conversation does not resolve a quota restriction. See [official error documentation](https://developers.openai.com/api/docs/guides/error-codes).

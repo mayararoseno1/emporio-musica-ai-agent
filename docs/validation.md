@@ -56,3 +56,12 @@ For actual conversations, copy `.env.example` to `.env`, configure `OPENAI_API_K
 ## Outstanding work
 
 The local implementation and available offline checks are complete. A fully verified recruitment delivery is **not** claimed: real model behavior, actual LLM transcripts, human review, public hosting and the recruiter submission remain outstanding. No live API costs were incurred. No repository was published, no email was sent and no store state was changed.
+
+
+## Follow-up: real provider failure diagnosis
+
+After credentials were configured, a real request reached OpenAI and returned HTTP 429. The structured error category was `insufficient_quota`. This confirms that quota/credit/usage configuration blocks the conversation before a model response is produced; it does not validate model behavior or tool selection. No key or raw error body was printed. Billing settings were not changed.
+
+Added `scripts/diagnose.py` and safe error classification in `src/errors.py`; agent logs now show useful operator guidance without exposing provider bodies. Added regression tests for quota, HTTP error categories and secret-free logs. The user's existing `.env.example` changes were preserved and excluded from the fix commit.
+
+Follow-up regression result: **39 passed in 26.08s**, with one warning about pytest cache write permissions. The first sandboxed run could not create temporary directories for six corruption tests; rerunning with the required filesystem access completed all tests. Imports compile, and the changed files pass `git diff --check`. API billing remains the external blocker; no successful live conversation is claimed.

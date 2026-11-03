@@ -3,6 +3,7 @@ import json
 import logging
 from collections import deque
 from .prompts import SYSTEM_PROMPT
+from .errors import provider_diagnostic
 
 log = logging.getLogger(__name__)
 FAILURE = 'Não consegui consultar as informações agora. Tente novamente em instantes ou procure a equipe da loja.'
@@ -45,6 +46,7 @@ class Agent:
                     self.last_trace.append({'tool':call.name,'result':result})
                     current.append({'type':'function_call_output','call_id':call.call_id,
                                     'output':json.dumps(result, ensure_ascii=False)})
-        except Exception:
-            log.error('Agent request failed')  # Never log raw provider errors/PII/secrets.
+        except Exception as exc:
+            category, hint = provider_diagnostic(exc)
+            log.error('Agent request failed [%s]: %s', category, hint)
         return FAILURE
