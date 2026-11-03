@@ -12,14 +12,17 @@ def provider_diagnostic(exc: Exception) -> tuple[str, str]:
         'billing_hard_limit_reached', 'organization_usage_limit_exceeded',
         'project_spend_limit_exceeded', 'organization_spend_limit_exceeded',
     } for code in codes):
-        return 'insufficient_quota', 'A API está sem cota disponível. Verifique créditos e limites de uso do projeto/organização na plataforma OpenAI.'
+        return 'insufficient_quota', 'A API está sem cota disponível. Verifique a cota gratuita, créditos (se usar plano pago) e limites do projeto no Google AI Studio.'
     status = getattr(exc, 'status_code', None)
+    details = error.get('details', [])
+    if isinstance(details, list) and any(isinstance(d, dict) and d.get('reason') == 'API_KEY_INVALID' for d in details):
+        return 'authentication', 'A chave Gemini foi recusada. Configure GEMINI_API_KEY com uma chave válida do Google AI Studio.'
     if status == 429:
-        return 'rate_limit_or_quota', 'A API retornou 429. Verifique o limite temporário e a cota da API; o provedor não informou uma categoria reconhecida.'
+        return 'rate_limit_or_quota', 'A API retornou 429. Verifique os limites por minuto/dia e a cota gratuita no Google AI Studio; o provedor não informou uma categoria reconhecida.'
     if status == 401:
-        return 'authentication', 'A API recusou a autenticação. Verifique OPENAI_API_KEY e o projeto associado.'
+        return 'authentication', 'A API recusou a autenticação. Verifique GEMINI_API_KEY e o projeto associado no Google AI Studio.'
     if status in (403, 404):
-        return 'model_or_access', 'Verifique OPENAI_MODEL e a permissão de acesso do projeto ao modelo.'
+        return 'model_or_access', 'Verifique GEMINI_MODEL e a permissão de acesso do projeto ao modelo.'
     if status == 400:
         return 'invalid_request', 'A API recusou os parâmetros da chamada. Revise o contrato da integração.'
     if type(exc).__name__ in {'APIConnectionError', 'APITimeoutError'}:

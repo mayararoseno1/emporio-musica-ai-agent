@@ -1,4 +1,4 @@
-"""Bounded Responses API function-calling loop, with atomic conversation history."""
+"""Bounded Gemini function-calling loop, with atomic conversation history."""
 import json
 import logging
 from collections import deque
@@ -22,30 +22,35 @@ class Agent:
         current = [{'role':'user','content':message}]
         self.last_trace = []
         try:
-            # Force consultation on every turn; the LLM still chooses the relevant tool.
-            # For off-topic/greetings it may retrieve scope/hours before replying.
             for step in range(6):
-                response = self.client.responses.create(
-                    model=self.model, instructions=SYSTEM_PROMPT,
-                    input=conversation + current, tools=self.tools.schemas(),
-                    tool_choice='required' if step == 0 else 'auto',
-                    parallel_tool_calls=False, max_output_tokens=1800, store=False)
-                calls = [item for item in response.output if item.type == 'function_call']
+                response = self.client.chat.completions.create(
+                    model=self.model,
+                    messages=[{'role':'system','content':SYSTEM_PROMPT}] + conversation + current,
+                    tools=self.tools.schemas(), tool_choice='required' if step == 0 else 'auto',
+                    max_tokens=1800, reasoning_effort='minimal')
+                choice = response.choices[0]
+                reply = choice.message
+                calls = reply.tool_calls or []
+                # Never keep truncated responses or execute incomplete tool arguments.
+                if choice.finish_reason not in {'stop','tool_calls'}:
+                    return FAILURE
                 if not calls:
-                    answer = response.output_text.strip()
+                    answer = (reply.content or '').strip()
                     if not answer:
                         return FAILURE
-                    current.extend(response.output)
+                    current.append({'role':'assistant','content':answer})
                     self.turns.append(current)
                     return answer
                 if len(calls) > 8:
                     return FAILURE
-                current.extend(response.output)
+                # Preserve provider-specific tool-call metadata (including thought signatures).
+                current.append({'role':'assistant','content':reply.content,
+                                'tool_calls':[call.model_dump(exclude_none=True) for call in calls]})
                 for call in calls:
-                    result = self.tools.call(call.name, call.arguments)
-                    self.last_trace.append({'tool':call.name,'result':result})
-                    current.append({'type':'function_call_output','call_id':call.call_id,
-                                    'output':json.dumps(result, ensure_ascii=False)})
+                    result = self.tools.call(call.function.name, call.function.arguments)
+                    self.last_trace.append({'tool':call.function.name,'result':result})
+                    current.append({'role':'tool','tool_call_id':call.id,
+                                    'content':json.dumps(result, ensure_ascii=False)})
         except Exception as exc:
             category, hint = provider_diagnostic(exc)
             log.error('Agent request failed [%s]: %s', category, hint)

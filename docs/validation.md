@@ -1,5 +1,7 @@
 # Validation and delivery report
 
+**Current provider: Google Gemini (`gemini-3.1-flash-lite`).** The OpenAI sections below record earlier milestones; the Gemini migration section at the end is the current configuration.
+
 ## Actual local verification
 
 Performed on 2026-11-02 (America/Fortaleza), using Python 3.12 in the project `.venv`.
@@ -65,3 +67,28 @@ After credentials were configured, a real request reached OpenAI and returned HT
 Added `scripts/diagnose.py` and safe error classification in `src/errors.py`; agent logs now show useful operator guidance without exposing provider bodies. Added regression tests for quota, HTTP error categories and secret-free logs. The user's existing `.env.example` changes were preserved and excluded from the fix commit.
 
 Follow-up regression result: **39 passed in 26.08s**, with one warning about pytest cache write permissions. The first sandboxed run could not create temporary directories for six corruption tests; rerunning with the required filesystem access completed all tests. Imports compile, and the changed files pass `git diff --check`. API billing remains the external blocker; no successful live conversation is claimed.
+
+
+## Gemini migration: current validation
+
+The user requested a lower-cost provider after OpenAI quota blocked live testing. The sole runtime provider is now Gemini, using the existing Python SDK through Google's documented OpenAI-compatible Chat Completions endpoint. All entry points use GEMINI_API_KEY and GEMINI_MODEL through src/config.py. Old OpenAI variables never select a provider or supply its key. No new packages were needed, no billing was enabled and no credentials were printed.
+
+The local ignored .env now contains empty GEMINI_API_KEY and the default GEMINI_MODEL, with preexisting settings preserved. The example configuration and README were updated. The selected model has a documented free tier with account/project quotas; this is not a promise of unlimited free access or a hard application spending cap. Paid account settings remain under user control. Google free-tier data-use terms are called out in the README.
+
+Final checks:
+
+- `python -m pytest -q -p no:cacheprovider --basetemp=.venv/pytest-gemini-final`: **44 passed in 44.91s**.
+- `python -m pip check`: no broken requirements.
+- `python -m compileall -q src scripts main.py`: successful.
+- `python main.py --check-data`: data and PDF loaded and validated.
+- `python -m scripts.examples`: five illustrative examples regenerated with real local tool evidence.
+- CLI/diagnostic without Gemini credentials: actionable configuration error; no fabricated conversation.
+- SDK contract test: correct Google host/path, function schemas, tool results and provider thought-signature metadata round-trip verified using in-memory HTTP.
+- Regression tests: previous tools, privacy, history and error boundaries retained; missing Gemini key cannot fall back to an OpenAI key; truncated/filtered responses are rejected atomically.
+- `git diff --check`: no whitespace errors.
+
+The custom test temporary directory is inside the ignored virtualenv to avoid the sandbox's default temporary-directory permission problem. Original store data remains unchanged and excluded from Git.
+
+**Live Gemini validation remains pending:** GEMINI_API_KEY is not configured. The five example conversations remain explicitly illustrative. Configure a Google AI Studio key, run `python -m scripts.diagnose`, then `python -m scripts.examples --live` to produce actual model transcripts. Public GitHub publication and recruiter submission have not been performed.
+
+Sources: [Google compatibility](https://ai.google.dev/gemini-api/docs/openai), [model](https://ai.google.dev/gemini-api/docs/models/gemini-3.1-flash-lite), [pricing](https://ai.google.dev/gemini-api/docs/pricing).

@@ -6,6 +6,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from src.tools import Store, Tools
 from src.agent import Agent, FAILURE
+from src.config import create_client, model_name
 
 ROOT = Path(__file__).resolve().parents[1]
 SCENARIOS = [
@@ -25,14 +26,14 @@ def main():
     store=Store(Path(os.getenv('DATA_DIR',str(ROOT/'data'/'original'))))
     tools=Tools(store,trusted_customer_id=3)
     if args.live:
-        if not os.getenv('OPENAI_API_KEY'):
-            parser.error('--live requires OPENAI_API_KEY')
-        from openai import OpenAI
-        client=OpenAI(timeout=30,max_retries=1)
+        try:
+            client=create_client()
+        except ValueError as exc:
+            parser.error(str(exc))
     for slug,questions,calls in SCENARIOS:
         lines=[f'# {slug}', '', 'Status: LIVE LLM EXECUTION' if args.live else 'Status: ILLUSTRATIVE CONVERSATION; no LLM executed. Tool evidence below was executed against supplied data.', '', 'Order example uses operator-provided demo identity 3. This is not authentication.', '']
         if args.live:
-            agent=Agent(client,tools,os.getenv('OPENAI_MODEL','gpt-4.1-mini'))
+            agent=Agent(client,tools,model_name())
             for question in questions:
                 answer=agent.reply(question)
                 if answer==FAILURE:

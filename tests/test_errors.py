@@ -1,4 +1,3 @@
-from types import SimpleNamespace
 from unittest.mock import Mock
 import pytest
 from src.errors import provider_diagnostic
@@ -34,9 +33,18 @@ def test_agent_logs_quota_without_secrets(tools,caplog):
     exc.status_code=429
     exc.body={'error':{'type':'insufficient_quota','message':'sk-private-secret'}}
     client=Mock()
-    client.responses.create.side_effect=exc
+    client.chat.completions.create.side_effect=exc
     agent=Agent(client,tools,'test')
     assert agent.reply('Violões?')==FAILURE
     assert 'insufficient_quota' in caplog.text
     assert 'sk-private-secret' not in caplog.text
     assert not agent.turns
+
+
+def test_gemini_invalid_key_diagnosis():
+    exc=RuntimeError('private-provider-message')
+    exc.status_code=400
+    exc.body={'error':{'details':[{'reason':'API_KEY_INVALID'}]}}
+    category,hint=provider_diagnostic(exc)
+    assert category=='authentication'
+    assert 'GEMINI_API_KEY' in hint

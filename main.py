@@ -4,7 +4,7 @@ import logging
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-from openai import OpenAI
+from src.config import create_client, model_name
 from src.agent import Agent
 from src.tools import Store, Tools
 
@@ -25,10 +25,11 @@ def main():
     if args.check_data:
         print('Dados e políticas carregados e validados.')
         return
-    if not os.getenv('OPENAI_API_KEY'):
-        parser.exit(2, 'Configure OPENAI_API_KEY no arquivo .env. Use --check-data para validação sem credenciais.\n')
-    client = OpenAI(timeout=30, max_retries=1)
-    agent = Agent(client, Tools(store, args.demo_customer_id), os.getenv('OPENAI_MODEL','gpt-4.1-mini'))
+    try:
+        client = create_client()
+    except ValueError as exc:
+        parser.exit(2, str(exc) + '\n')
+    agent = Agent(client, Tools(store, args.demo_customer_id), model_name())
     print('Empório da Música: Olá! Como posso ajudar? (digite sair para encerrar)')
     while True:
         try:

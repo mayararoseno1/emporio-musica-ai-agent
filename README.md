@@ -14,7 +14,9 @@ flowchart LR
     Agent --> CLI
 ```
 
-OpenAI Responses API with `gpt-4.1-mini` interprets requests, selects functions and writes natural responses. It is a configurable compact model with function calling, chosen for a small support prototype where cost and latency matter. Actual latency/cost/quality have not been benchmarked. See [model documentation](https://developers.openai.com/api/docs/models/gpt-4.1-mini) and [function calling](https://developers.openai.com/api/docs/guides/function-calling).
+Google Gemini API with `gemini-3.1-flash-lite` interprets requests, selects functions and writes natural responses. This compact model supports function calling and has a free tier subject to project/region availability and quotas. It was selected to make the recruitment prototype easier to test without funded OpenAI API access. Paid pricing and free quotas may change; consult [Google pricing](https://ai.google.dev/gemini-api/docs/pricing) and [model capabilities](https://ai.google.dev/gemini-api/docs/models/gemini-3.1-flash-lite).
+
+The existing `openai` Python package is retained **only as an SDK client for Google's documented OpenAI-compatible Chat Completions endpoint**. All model requests target `generativelanguage.googleapis.com`; there is no OpenAI provider path or fallback. This avoids adding a second SDK. See [Google compatibility documentation](https://ai.google.dev/gemini-api/docs/openai). Thinking effort is minimal to reduce latency/token overhead; output is capped and truncated responses are not accepted. Provider-specific tool-call metadata (thought signatures) is preserved in history.
 
 Pandas performs structured lookup; Pydantic rejects unknown fields and invalid arguments. Money calculations use Decimal with half-up cent rounding. No SQL generation, arbitrary code execution, agent framework, vector database, web server or cloud infrastructure is needed. A CLI satisfies the original brief and keeps attention on behavior and testability.
 
@@ -37,7 +39,7 @@ All original CSVs and both PDFs were examined before implementation. See [analys
 
 ## Setup
 
-Requires Python 3.12+ (tested here with Python 3.12; the frozen NumPy dependency requires it), Git, internet for installing dependencies and an OpenAI API key with model access for actual conversations. The prepared local `.venv` already contains dependencies in this workspace.
+Requires Python 3.12+ (tested here with Python 3.12; the frozen NumPy dependency requires it), Git, internet for installing dependencies and a Google AI Studio Gemini API key with model access for actual conversations. The prepared local `.venv` already contains dependencies in this workspace. No additional dependency installation is required for the Gemini migration.
 
 From the repository root, on Windows PowerShell:
 
@@ -47,7 +49,7 @@ python -m venv .venv
 Copy-Item .env.example .env
 ```
 
-Edit `.env`, setting `OPENAI_API_KEY` to your key. `OPENAI_MODEL` defaults to `gpt-4.1-mini`; `DATA_DIR` optionally points to the supplied data directory. Variables already present in the process take precedence over `.env`. Never commit `.env`. On macOS/Linux use `python3` and `.venv/bin/python` instead.
+Get a key from [Google AI Studio](https://aistudio.google.com/apikey). Edit `.env`, setting `GEMINI_API_KEY` to your key. `GEMINI_MODEL` defaults to `gemini-3.1-flash-lite`; `DATA_DIR` optionally points to the supplied data directory. Variables already present in the process take precedence over `.env`. Never commit `.env`. On macOS/Linux use `python3` and `.venv/bin/python` instead.
 
 ### Original files
 
@@ -95,7 +97,7 @@ This binds the demo session to customer 3 independently of model/user text. It i
 | `search_store_policies` | Retrieved policy sections with source/page |
 | `get_store_information` | Store address, hours and contacts from PDF |
 
-Unknown functions are rejected. Invalid JSON, extra fields, negative prices, wrong types and reversed ranges return structured errors. Tool failures are isolated; provider failures return a short Portuguese message. Logs contain only error categories/tool names, not customer inputs, tool arguments, secrets or raw provider exceptions. `store=False` disables Responses application-state storage; provider data processing still follows the account's API policies. Relevant product/policy passages and user messages are sent to the model provider.
+Unknown functions are rejected. Invalid JSON, extra fields, negative prices, wrong types and reversed ranges return structured errors. Tool failures are isolated; provider failures return a short Portuguese message. Logs contain only error categories/tool names, not customer inputs, tool arguments, secrets or raw provider exceptions. Relevant product/policy passages and user messages are sent to Google. Free-tier content may be used to improve Google's products under its applicable terms; use this fictional challenge data, not real customer conversations. There is no automatic fallback to a paid model/provider. Billing and free-tier eligibility are controlled by your Google project, not by this application.
 
 ## Validation and examples
 
@@ -120,7 +122,7 @@ Each scenario creates a separate conversation; the product scenario includes a f
 
 ```text
 src/tools.py       Data validation, retrieval, deterministic tools and registry
-src/agent.py       Responses function loop and bounded conversational state
+src/agent.py       Gemini function loop and bounded conversational state
 src/prompts.py     Portuguese system instructions
 main.py            Local CLI and environment configuration
 scripts/examples.py  Reproducible evidence and optional live transcripts
@@ -134,13 +136,13 @@ Dependencies are frozen in `requirements.txt` from the installed environment. No
 
 ## Limitations and next steps
 
-Initial validation had no API credentials. A subsequent real provider diagnostic reached the API but returned HTTP 429 with type `insufficient_quota`; end-to-end model validation is still blocked by API quota/billing. Lexical search can miss synonyms; section ranking can retrieve neighboring topics. Tool-call selection and final prose are probabilistic even when returned facts are deterministic. No post-generation factual verifier exists. Default history is capped by turns rather than token budget. Original inputs are required to reproduce integration tests. The data snapshot and policy version may be old. Store holidays and special hours are not available. The CLI trusts its local operator, not arbitrary remote customers.
+The previous OpenAI integration was blocked by quota. The application has since migrated to Gemini. End-to-end Gemini behavior remains unverified until a GEMINI_API_KEY is configured; offline tests exercise the real SDK using simulated HTTP responses. Lexical search can miss synonyms; section ranking can retrieve neighboring topics. Tool-call selection and final prose are probabilistic even when returned facts are deterministic. No post-generation factual verifier exists. Default history is capped by turns rather than token budget. Original inputs are required to reproduce integration tests. The data snapshot and policy version may be old. Store holidays and special hours are not available. The CLI trusts its local operator, not arbitrary remote customers.
 
 Next steps are live grounded-answer evaluations (including off-topic requests and injection), richer Portuguese retrieval with measured recall, token-based history limits, authenticated customer sessions before remote exposure, dataset schema expansion for receipt dates and historical prices, and staff review of policy contradictions. Embeddings or an HTTP API should only be added if measured needs justify them.
 
 ## AI development assistance
 
-OpenAI Codex inspected the supplied materials, analyzed the CSVs/PDFs, made architecture decisions, implemented the code, created mock-based tests and illustrative scenarios, ran verification and wrote documentation. Codex used official OpenAI documentation to check the API integration. No human code review, independent live evaluation or manual authorship of all code is claimed. Review the implementation and tradeoffs before interview/submission.
+OpenAI Codex inspected the supplied materials, analyzed the CSVs/PDFs, made architecture decisions, implemented the code, created mock-based tests and illustrative scenarios, ran verification and wrote documentation. Codex used official OpenAI documentation for the original integration and official Google documentation for the Gemini migration. No human code review, independent live evaluation or manual authorship of all code is claimed. Review the implementation and tradeoffs before interview/submission.
 
 ## Git and delivery
 
@@ -155,6 +157,6 @@ If the GitHub CLI is unavailable, create the public repository in GitHub, add it
 
 ## API troubleshooting
 
-Run `python -m scripts.diagnose` from the repository root to perform one short real API request. It may incur API usage if successful; it prints only a safe category and operator guidance, never the key or raw response body. Failure exits with status 1. Agent logs now distinguish quota, authentication, access, request and connection failures while keeping customer-facing replies generic.
+Run `python -m scripts.diagnose` from the repository root to perform one short real API request. It uses your Gemini project quota (and may incur charges if that project has paid billing); it prints only a safe category and operator guidance, never the key or raw response body. Failure exits with status 1. Agent logs now distinguish quota, authentication, access, request and connection failures while keeping customer-facing replies generic.
 
-The observed 429 `insufficient_quota` requires checking API credits and usage/spend limits for the key's project/organization. Repeating the same conversation does not resolve a quota restriction. See [official error documentation](https://developers.openai.com/api/docs/guides/error-codes).
+Gemini may return 429 when the free-tier per-minute/day or project quota is exhausted. Check your Google AI Studio usage and available models. Enabling billing is not performed by this app. The old OpenAI quota error no longer applies to the provider configuration; OPENAI_API_KEY and OPENAI_MODEL are ignored.

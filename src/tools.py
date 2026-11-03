@@ -188,7 +188,7 @@ class Tools:
         self.store, self.trusted_customer_id = store, trusted_customer_id
 
     def schemas(self):
-        return [{'type':'function','name': name,'description':DESCRIPTIONS[name], 'parameters': model.model_json_schema(), 'strict':False} for name,model in TOOL_MODELS.items()]
+        return [{'type':'function','function':{'name': name,'description':DESCRIPTIONS[name], 'parameters': model.model_json_schema()}} for name,model in TOOL_MODELS.items()]
 
     def call(self, name: str, arguments: str):
         if name not in TOOL_MODELS:

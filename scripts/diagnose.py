@@ -1,20 +1,27 @@
-"""Diagnose provider access without printing credentials or raw response bodies."""
+"""Diagnose Gemini access without printing credentials or raw response bodies."""
 from pathlib import Path
 from dotenv import load_dotenv
-from openai import OpenAI
+from src.config import create_client, model_name
+from src.errors import provider_diagnostic
 from src.tools import Store, Tools
 
-
-from src.errors import provider_diagnostic
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def main():
-    load_dotenv(Path(__file__).resolve().parents[1]/'.env')
+    load_dotenv(ROOT/'.env')
     try:
-        import os
-        client=OpenAI(timeout=20,max_retries=0)
-        result=client.responses.create(model=os.getenv('OPENAI_MODEL','gpt-4.1-mini'),input='Vocês têm violões até mil reais?',tools=Tools(Store(Path('data/original'))).schemas(),tool_choice='required',max_output_tokens=150,store=False)
-        print('Provider request succeeded. Output types:',[item.type for item in result.output])
+        with create_client(timeout=20,max_retries=0) as client:
+            result=client.chat.completions.create(
+                model=model_name(), messages=[{'role':'user','content':'Vocês têm violões até mil reais?'}],
+                tools=Tools(Store(ROOT/'data'/'original')).schemas(),
+                tool_choice='required',max_tokens=250,reasoning_effort='minimal')
+            if not result.choices or not result.choices[0].message.tool_calls:
+                raise ValueError('No tool call returned')
+            print('Gemini request succeeded; function calling returned a tool call.')
+    except ValueError:
+        print('Verifique GEMINI_API_KEY no .env e a configuração de ferramentas/modelo.')
+        raise SystemExit(1) from None
     except Exception as exc:
         category, hint = provider_diagnostic(exc)
         print('Diagnostic:', category)
